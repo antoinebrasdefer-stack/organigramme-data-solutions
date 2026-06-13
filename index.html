@@ -218,222 +218,244 @@ async function loadData(){
   }
 }
 
-function initApp(){
-  /* ============================================================
-    LOGIQUE
-    ============================================================ */
-  const initials = n => n.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
-  const missionLabel = { interne:"Interne", externe:"Externe", both:"Les deux" };
-  const MANAGER = DATA.find(p=>p.isManager);
-  const PARTNERS = DATA.filter(p=>p.isPartner);
-  const TEAM = DATA.filter(p=>!p.isManager && !p.isPartner);
+<script>
+/* ============================================================
+   VARIABLES GLOBALES (accessibles partout)
+   ============================================================ */
+let DATA = [];
+let MANAGER, PARTNERS, TEAM;
+let currentView = 'grid';
 
-  function anciennete(dateStr){
-    const d = new Date(dateStr), now = new Date();
-    let months = (now.getFullYear()-d.getFullYear())*12 + (now.getMonth()-d.getMonth());
-    const y = Math.floor(months/12), m = months%12;
-    if(y===0) return m+" mois";
-    return y+" an"+(y>1?"s":"")+(m>0?" et "+m+" mois":"");
-  }
+// Fonctions utilitaires globales
+const initials = n => n.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+const missionLabel = { interne:"Interne", externe:"Externe", both:"Les deux" };
 
-  const allSkills = [...new Set(DATA.flatMap(p=>p.skills))].sort();
-  const skillSel = document.getElementById('filterSkill');
-  allSkills.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; skillSel.appendChild(o); });
+function anciennete(dateStr){
+  if(!dateStr) return "Non renseignée";
+  const d = new Date(dateStr), now = new Date();
+  let months = (now.getFullYear()-d.getFullYear())*12 + (now.getMonth()-d.getMonth());
+  const y = Math.floor(months/12), m = months%12;
+  if(y===0) return m+" mois";
+  return y+" an"+(y>1?"s":"")+(m>0?" et "+m+" mois":"");
+}
 
-  let currentView = 'grid';
+function avatarHtml(p){
+  return `<div class="avatar">${p.photo
+    ? `<img src="${p.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`
+    : initials(p.name)}</div>`;
+}
 
-  function avatarHtml(p, cls=''){
-    return `<div class="avatar ${cls}">${p.photo?`<img src="${p.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`:initials(p.name)}</div>`;
-  }
+function cardHtml(p, type=''){
+  const tag = type==='manager' ? `<span class="manager-tag">⭐ Manager</span>`
+            : type==='partner' ? `<span class="partner-tag">🤝 Autre équipe</span>` : '';
+  return `
+    <div class="card ${type}" onclick="openPanel(${p.id})">
+      ${tag}
+      ${avatarHtml(p)}
+      <h3>${p.name}</h3>
+      <div class="role">${p.role}</div>
+      ${p.location ? `<div class="location">📍 ${p.location}</div>` : ''}
+      <div class="card-tags">${p.skills && p.skills.length
+        ? p.skills.map(s=>`<span class="tag">${s}</span>`).join('')
+        : '<span class="tag" style="opacity:.5">À compléter</span>'}
+      </div>
+    </div>`;
+}
 
-  function cardHtml(p, type=''){
-    const tag = type==='manager' ? `<span class="manager-tag">⭐ Manager</span>`
-              : type==='partner' ? `<span class="partner-tag">🤝 Autre équipe</span>` : '';
+/* ============================================================
+   FONCTIONS APPELÉES DEPUIS LE HTML → doivent être globales
+   ============================================================ */
+function render(){
+  if(!MANAGER) return;
+  document.getElementById('managerZone').innerHTML = cardHtml(MANAGER, 'manager');
+  document.getElementById('partnerZone').innerHTML = PARTNERS.map(p=>cardHtml(p,'partner')).join('');
+
+  const q = document.getElementById('search').value.toLowerCase();
+  const skill = document.getElementById('filterSkill').value;
+  const mission = document.getElementById('filterMission').value;
+
+  const list = TEAM.filter(p=>{
+    const matchQ = !q || (p.name+p.role+(p.skills||[]).join(" ")).toLowerCase().includes(q);
+    const matchSkill = !skill || (p.skills||[]).includes(skill);
+    const matchMission = !mission || p.mission===mission;
+    return matchQ && matchSkill && matchMission;
+  });
+
+  document.getElementById('teamGrid').innerHTML =
+    list.map(p=>cardHtml(p)).join('') || `<p style="color:var(--muted);padding:20px">Aucun résultat.</p>`;
+}
+
+function openPanel(id){
+  const p = DATA.find(x=>x.id===id);
+  if(!p) return;
+  const panel = document.getElementById('panel');
+  panel.innerHTML = `
+    <button class="close" onclick="closePanel()">×</button>
+    ${avatarHtml(p)}
+    <h2>${p.name}</h2>
+    <div class="role">${p.role} &nbsp;·&nbsp;
+      <span class="badge ${p.mission}">${missionLabel[p.mission]}</span>
+    </div>
+    <div class="panel-section">
+      <div class="meta-row"><span>📍 Localisation</span><strong>${p.location || "Non renseignée"}</strong></div>
+      <div class="meta-row"><span>📅 Ancienneté</span><strong>${anciennete(p.joinDate)}</strong></div>
+      <div class="meta-row"><span>Arrivé(e) le</span><span>${p.joinDate ? new Date(p.joinDate).toLocaleDateString('fr-FR') : "—"}</span></div>
+    </div>
+    <div class="panel-section"><h4>🎯 Mission actuelle</h4><p>${p.missionDesc||'—'}</p></div>
+    <div class="panel-section"><h4>🎓 Parcours</h4><p>${p.parcours||'—'}</p></div>
+    <div class="panel-section"><h4>❤️ Passions</h4><p>${p.passions||'—'}</p></div>
+    <div class="panel-section"><h4>🛠️ Compétences</h4>
+      <div class="tags">${p.skills && p.skills.length
+        ? p.skills.map(s=>`<span class="tag">${s}</span>`).join('')
+        : '<span class="tag" style="opacity:.5">À compléter</span>'}
+      </div>
+    </div>
+    ${p.slack ? `<div class="panel-section">
+      <a class="slack-btn" href="https://slack.com/app_redirect?channel=${p.slack}" target="_blank">
+        💬 Contacter sur Slack (${p.slack})
+      </a>
+    </div>` : ''}
+  `;
+  panel.classList.add('open');
+  document.getElementById('overlay').style.display='block';
+}
+
+function closePanel(){
+  document.getElementById('panel').classList.remove('open');
+  document.getElementById('overlay').style.display='none';
+}
+
+function switchView(v){
+  currentView = v;
+  document.getElementById('gridView').style.display = v==='grid' ? 'block' : 'none';
+  document.getElementById('vennView').style.display  = v==='venn'  ? 'block' : 'none';
+  document.getElementById('btnGrid').classList.toggle('active', v==='grid');
+  document.getElementById('btnVenn').classList.toggle('active',  v==='venn');
+  if(v==='venn') drawVenn();
+}
+
+function setVennFilter(m){
+  document.getElementById('filterMission').value = m;
+  switchView('grid');
+  render();
+}
+
+function drawVenn(){
+  const svg = document.getElementById('vennSvg');
+  const groups = {
+    interne: DATA.filter(p=>p.mission==='interne'),
+    both:    DATA.filter(p=>p.mission==='both'),
+    externe: DATA.filter(p=>p.mission==='externe'),
+  };
+  const R=30, cellW=130, cellH=95, PAD_TOP=90;
+  const colsInterne=2, colsBoth=3, colsExterne=2, startX=40;
+  const rows = {
+    interne: Math.ceil(groups.interne.length/colsInterne)||1,
+    both:    Math.ceil(groups.both.length/colsBoth)||1,
+    externe: Math.ceil(groups.externe.length/colsExterne)||1,
+  };
+  const maxRows = Math.max(rows.interne, rows.both, rows.externe, 1);
+  const rectH = maxRows*cellH+60, rectY = PAD_TOP;
+  const wInterne=colsInterne*cellW, wBoth=colsBoth*cellW, wExterne=colsExterne*cellW;
+  const rectInterne = {x:startX, w:wInterne+wBoth};
+  const rectExterne = {x:startX+wInterne, w:wBoth+wExterne};
+  const totalW = startX*2+wInterne+wBoth+wExterne;
+  const totalH = rectY+rectH+70;
+  const xInterneStart=startX+cellW/2;
+  const xBothStart=startX+wInterne+cellW/2;
+  const xExterneStart=startX+wInterne+wBoth+cellW/2;
+  svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+
+  let html = `
+    <rect class="venn-rect" x="${rectInterne.x}" y="${rectY}" width="${rectInterne.w}" height="${rectH}" rx="40"
+      fill="var(--interne)" stroke="var(--interne)" onclick="setVennFilter('interne')"/>
+    <rect class="venn-rect" x="${rectExterne.x}" y="${rectY}" width="${rectExterne.w}" height="${rectH}" rx="40"
+      fill="var(--externe)" stroke="var(--externe)" onclick="setVennFilter('externe')"/>
+    <text class="venn-label" x="${rectInterne.x+20}" y="${rectY-30}" fill="var(--interne)">INTERNE</text>
+    <text class="venn-label" x="${rectExterne.x+rectExterne.w-130}" y="${rectY-30}" fill="var(--externe)">EXTERNE</text>
+    <text x="${startX+wInterne+wBoth/2}" y="${totalH-25}" text-anchor="middle"
+      font-size="14" font-weight="700" fill="var(--both)"
+      style="cursor:pointer" onclick="setVennFilter('both')">↕ Les deux (intersection)</text>
+  `;
+
+  function renderPerson(p, cx, cy){
+    const img = p.photo
+      ? `<image href="${p.photo}" x="${cx-R}" y="${cy-R}" width="${R*2}" height="${R*2}" clip-path="url(#clip${p.id})"/>`
+      : `<text x="${cx}" y="${cy+6}" text-anchor="middle" font-size="16" font-weight="700" fill="#475569">${initials(p.name)}</text>`;
+    const name = p.name.length > 18 ? p.name.slice(0,17)+'…' : p.name;
     return `
-      <div class="card ${type}" onclick="openPanel(${p.id})">
-        ${tag}
-        ${avatarHtml(p)}
-        <h3>${p.name}</h3>
-        <div class="role">${p.role}</div>
-        ${p.location ? `<div class="location">📍 ${p.location}</div>` : ''}
-        <div class="card-tags">${p.skills.length ? p.skills.map(s=>`<span class="tag">${s}</span>`).join('') : '<span class="tag" style="opacity:.5">À compléter</span>'}</div>
+      <clipPath id="clip${p.id}"><circle cx="${cx}" cy="${cy}" r="${R}"/></clipPath>
+      <g class="venn-person" onclick="openPanel(${p.id})">
+        <circle cx="${cx}" cy="${cy}" r="${R}" fill="#e2e8f0" stroke="white" stroke-width="3"/>
+        ${img}
+        <text class="vp-name" x="${cx}" y="${cy+R+15}">${name}</text>
+      </g>`;
+  }
+
+  function placeGroup(list, cols, xStart){
+    const n = list.length;
+    const nbRows = Math.ceil(n/cols)||1;
+    const gridH = nbRows*cellH;
+    const yStart = rectY+(rectH-gridH)/2+cellH/2;
+    let s='';
+    list.forEach((p,i)=>{
+      const col = i%cols;
+      const row = Math.floor(i/cols);
+      const itemsThisRow = Math.min(cols, n-row*cols);
+      const rowOffset = (cols-itemsThisRow)*cellW/2;
+      const cx = xStart+col*cellW+rowOffset;
+      const cy = yStart+row*cellH;
+      s += renderPerson(p, cx, cy);
+    });
+    return s;
+  }
+
+  html += placeGroup(groups.interne, colsInterne, xInterneStart);
+  html += placeGroup(groups.both,    colsBoth,    xBothStart);
+  html += placeGroup(groups.externe, colsExterne, xExterneStart);
+  svg.innerHTML = html;
+}
+
+/* ============================================================
+   CHARGEMENT DES DONNÉES + INITIALISATION
+   ============================================================ */
+async function loadData(){
+  try{
+    const res = await fetch('data.json?v=' + Date.now());
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    DATA = await res.json();
+    initApp();
+  }catch(e){
+    document.body.innerHTML = `
+      <div style="padding:40px;font-family:sans-serif">
+        <h2 style="color:red">❌ Erreur : ${e.message}</h2>
+        <p>URL tentée : ${window.location.href.replace('index.html','')}data.json</p>
       </div>`;
   }
-
-  function getFiltered(){
-    const q = document.getElementById('search').value.toLowerCase();
-    const skill = document.getElementById('filterSkill').value;
-    const mission = document.getElementById('filterMission').value;
-    return TEAM.filter(p=>{
-      const matchQ = !q || (p.name+p.role+p.skills.join(" ")).toLowerCase().includes(q);
-      const matchSkill = !skill || p.skills.includes(skill);
-      const matchMission = !mission || p.mission===mission;
-      return matchQ && matchSkill && matchMission;
-    });
-  }
-
-  function render(){
-    document.getElementById('managerZone').innerHTML = cardHtml(MANAGER, 'manager');
-    document.getElementById('partnerZone').innerHTML = PARTNERS.map(p=>cardHtml(p,'partner')).join('');
-    const list = getFiltered();
-    document.getElementById('teamGrid').innerHTML =
-      list.map(p=>cardHtml(p)).join('') || `<p style="color:var(--muted)">Aucun résultat.</p>`;
-  }
-
-
-  /* ---- VENN (rectangles arrondis, disposition dynamique, zone centrale = 3 colonnes) ---- */
-  function drawVenn(){
-    const svg = document.getElementById('vennSvg');
-
-    // On inclut manager + partenaires + équipe dans le Venn
-    const ALL = DATA.slice();
-    const groups = {
-      interne: ALL.filter(p=>p.mission==='interne'),
-      both:    ALL.filter(p=>p.mission==='both'),
-      externe: ALL.filter(p=>p.mission==='externe'),
-    };
-
-    // --- Paramètres ajustables ---
-    const R = 30;            // rayon photo
-    const cellW = 130;       // largeur d'une case personne
-    const cellH = 95;        // hauteur d'une case (photo + nom)
-    const PAD_TOP = 90;      // espace pour les labels
-    const colsInterne = 2;   // zone gauche
-    const colsBoth    = 3;   // zone centrale (intersection) → 3 colonnes
-    const colsExterne = 2;   // zone droite
-    const startX = 40;
-
-    // Nombre de lignes nécessaires par zone
-    const rows = {
-      interne: Math.ceil(groups.interne.length / colsInterne) || 1,
-      both:    Math.ceil(groups.both.length    / colsBoth)    || 1,
-      externe: Math.ceil(groups.externe.length / colsExterne) || 1,
-    };
-    const maxRows = Math.max(rows.interne, rows.both, rows.externe, 1);
-
-    // Hauteur dynamique
-    const rectH = maxRows * cellH + 60;
-    const rectY = PAD_TOP;
-
-    // Largeurs en pixels
-    const wInterne = colsInterne * cellW;
-    const wBoth    = colsBoth    * cellW;
-    const wExterne = colsExterne * cellW;
-
-    // Rectangles qui se chevauchent sur la zone "both"
-    const rectInterne = { x: startX, w: wInterne + wBoth };
-    const rectExterne = { x: startX + wInterne, w: wBoth + wExterne };
-
-    const totalW = startX*2 + wInterne + wBoth + wExterne;
-    const totalH = rectY + rectH + 70;
-
-    // Centres X de départ de chaque zone-colonne
-    const xInterneStart = startX + cellW/2;
-    const xBothStart    = startX + wInterne + cellW/2;
-    const xExterneStart = startX + wInterne + wBoth + cellW/2;
-
-    svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
-
-    let html = `
-      <rect class="venn-rect" x="${rectInterne.x}" y="${rectY}" width="${rectInterne.w}" height="${rectH}" rx="40"
-            fill="var(--interne)" stroke="var(--interne)" onclick="setVennFilter('interne')"/>
-      <rect class="venn-rect" x="${rectExterne.x}" y="${rectY}" width="${rectExterne.w}" height="${rectH}" rx="40"
-            fill="var(--externe)" stroke="var(--externe)" onclick="setVennFilter('externe')"/>
-      <text class="venn-label" x="${rectInterne.x + 20}" y="${rectY - 30}" fill="var(--interne)">INTERNE</text>
-      <text class="venn-label" x="${rectExterne.x + rectExterne.w - 130}" y="${rectY - 30}" fill="var(--externe)">EXTERNE</text>
-      <text x="${startX + wInterne + wBoth/2}" y="${totalH - 25}" text-anchor="middle" font-size="14" font-weight="700" fill="var(--both)"
-            style="cursor:pointer" onclick="setVennFilter('both')">↕ Les deux (intersection)</text>
-    `;
-
-    function renderPerson(p, cx, cy){
-      const img = p.photo
-        ? `<image href="${p.photo}" x="${cx-R}" y="${cy-R}" width="${R*2}" height="${R*2}" clip-path="url(#clip${p.id})"/>`
-        : `<text x="${cx}" y="${cy+6}" text-anchor="middle" font-size="16" font-weight="700" fill="#475569">${initials(p.name)}</text>`;
-      const name = p.name.length > 18 ? p.name.slice(0,17)+'…' : p.name;
-      return `
-        <clipPath id="clip${p.id}"><circle cx="${cx}" cy="${cy}" r="${R}"/></clipPath>
-        <g class="venn-person" onclick="openPanel(${p.id})">
-          <circle cx="${cx}" cy="${cy}" r="${R}" fill="#e2e8f0" stroke="white" stroke-width="3"/>
-          ${img}
-          <text class="vp-name" x="${cx}" y="${cy+R+15}">${name}</text>
-        </g>`;
-    }
-
-    function placeGroup(list, cols, xStart){
-      const n = list.length;
-      const nbRows = Math.ceil(n / cols) || 1;
-      const gridH = nbRows * cellH;
-      const yStart = rectY + (rectH - gridH)/2 + cellH/2; // centrage vertical
-      let s = '';
-      list.forEach((p, i)=>{
-        const col = i % cols;
-        const row = Math.floor(i / cols);
-        const itemsThisRow = Math.min(cols, n - row*cols);
-        const rowOffset = (cols - itemsThisRow) * cellW / 2; // centrer la dernière ligne incomplète
-        const cx = xStart + col * cellW + rowOffset;
-        const cy = yStart + row * cellH;
-        s += renderPerson(p, cx, cy);
-      });
-      return s;
-    }
-
-    html += placeGroup(groups.interne, colsInterne, xInterneStart);
-    html += placeGroup(groups.both,    colsBoth,    xBothStart);
-    html += placeGroup(groups.externe, colsExterne, xExterneStart);
-
-    svg.innerHTML = html;
-  }
-
-  function setVennFilter(m){
-    document.getElementById('filterMission').value = m;
-    switchView('grid');
-    render();
-  }
-
-  function switchView(v){
-    currentView=v;
-    document.getElementById('gridView').style.display = v==='grid'?'block':'none';
-    document.getElementById('vennView').style.display = v==='venn'?'block':'none';
-    document.getElementById('btnGrid').classList.toggle('active', v==='grid');
-    document.getElementById('btnVenn').classList.toggle('active', v==='venn');
-    if(v==='venn') drawVenn();
-  }
-
-  /* ---- PANEL ---- */
-  function openPanel(id){
-    const p = DATA.find(x=>x.id===id);
-    const panel = document.getElementById('panel');
-    panel.innerHTML = `
-      <button class="close" onclick="closePanel()">×</button>
-      ${avatarHtml(p)}
-      <h2>${p.name}</h2>
-      <div class="role">${p.role} &nbsp;·&nbsp; <span class="badge ${p.mission}">${missionLabel[p.mission]}</span></div>
-
-  <div class="panel-section">
-        <div class="meta-row"><span>📍 Localisation</span><strong>${p.location || "Non renseignée"}</strong></div>
-        <div class="meta-row"><span>📅 Ancienneté</span><strong>${anciennete(p.joinDate)}</strong></div>
-        <div class="meta-row"><span>Arrivé(e) le</span><span>${p.joinDate ? new Date(p.joinDate).toLocaleDateString('fr-FR') : "—"}</span></div>
-      </div>
-
-      <div class="panel-section"><h4>🎯 Mission actuelle</h4><p>${p.missionDesc}</p></div>
-      <div class="panel-section"><h4>🎓 Parcours</h4><p>${p.parcours}</p></div>
-      <div class="panel-section"><h4>❤️ Passions</h4><p>${p.passions}</p></div>
-      <div class="panel-section"><h4>🛠️ Compétences</h4>
-        <div class="tags">${p.skills.map(s=>`<span class="tag">${s}</span>`).join('')}</div>
-      </div>
-      <div class="panel-section">
-        <a class="slack-btn" href="https://slack.com/app_redirect?channel=${p.slack}" target="_blank">💬 Contacter sur Slack (${p.slack})</a>
-      </div>
-    `;
-    panel.classList.add('open');
-    document.getElementById('overlay').style.display='block';
-  }
-  function closePanel(){
-    document.getElementById('panel').classList.remove('open');
-    document.getElementById('overlay').style.display='none';
-  }
 }
-loadData(); // démarre tout
+
+function initApp(){
+  // Initialise les groupes globaux
+  MANAGER  = DATA.find(p=>p.isManager);
+  PARTNERS = DATA.filter(p=>p.isPartner);
+  TEAM     = DATA.filter(p=>!p.isManager && !p.isPartner);
+
+  // Rempli le filtre compétences
+  const allSkills = [...new Set(DATA.flatMap(p=>p.skills||[]))].sort();
+  const skillSel  = document.getElementById('filterSkill');
+  // Évite les doublons si initApp appelé plusieurs fois
+  skillSel.querySelectorAll('option:not([value=""])').forEach(o=>o.remove());
+  allSkills.forEach(s=>{
+    const o = document.createElement('option');
+    o.value = s; o.textContent = s;
+    skillSel.appendChild(o);
+  });
+
+  // Premier affichage
+  render();
+}
+
+// Démarre tout
+loadData();
 </script>
-</body>
 </html>
