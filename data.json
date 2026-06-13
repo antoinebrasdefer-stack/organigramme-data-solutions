@@ -1,0 +1,286 @@
+const DATA = [
+  {
+    "id": 0,
+    "name": "Pierre Robin",
+    "role": "Team Lead — Data Solutions",
+    "mission": "both",
+    "joinDate": "2017-09-01",
+    "skills": [
+      "Management",
+      "Stratégie Data"
+    ],
+    "slack": "pierre.robin@claranet.com",
+    "location": "Rennes",
+    "parcours": "Team Lead de l'équipe Data Solutions (DAI).",
+    "missionDesc": "Pilotage de l'équipe Data Solutions.",
+    "passions": "—",
+    "isManager": true
+  },
+  {
+    "id": 100,
+    "name": "Clément Renouard",
+    "role": "Product Owner Data",
+    "mission": "interne",
+    "joinDate": "",
+    "skills": [
+      "Product Ownership",
+      "BI",
+      "Data Engineering"
+    ],
+    "slack": "",
+    "location": "Rennes",
+    "parcours": "Stage de fin d'études chez Claranet puis alternance. Études de contrôle de gestion et de bases de données, IAE Rennes. Profil hybride BI + Data Engineering.",
+    "missionDesc": "PO sur des projets data internes. Mission de regroupement des dashboards existants en plus du run de ses projets. (Autre équipe).",
+    "passions": "Preneur de bonnes pratiques sur le product ownership.",
+    "isPartner": true
+  },
+  {
+    "id": 1,
+    "name": "Gilles Bedouillat",
+    "role": "Développeur",
+    "mission": "interne",
+    "joinDate": "2019-08-01",
+    "skills": [
+      "BI",
+      "Automatisation",
+      "Données RH"
+    ],
+    "slack": "",
+    "location": "Rennes",
+    "parcours": "26 ans d'expérience, 7 ans chez Claranet. Très orienté BI. A travaillé sur des données RH (TalentSoft) et ATLAS (référentiel de données).",
+    "missionDesc": "Projet Flow → facturation rapide : récupération des données et automatisation des temps. PO : Clément Renouard.",
+    "passions": "Jeux de société, plongée (niveau 3), volleyball, voyages (Indonésie)."
+  },
+  {
+    "id": 2,
+    "name": "Julien Gallart",
+    "role": "Ingénieur Data",
+    "mission": "both",
+    "joinDate": "2026-03-02",
+    "skills": [
+      "dbt",
+      "Snowflake",
+      "Airflow",
+      "DevOps",
+      "GitHub"
+    ],
+    "slack": "",
+    "location": "Rennes",
+    "parcours": "Alternance BTS puis Master. AMOA banque (Natixis, BNP) sur la fraude. Sopra Steria en alternance (service public). ESN spécialisée data. Data Engineer chez Accor Hotels. Chez Claranet depuis mars.",
+    "missionDesc": "Open stack : dbt, Snowflake, Airflow, DevOps (GitHub).",
+    "passions": "Musculation, course à pied. Marié."
+  },
+  {
+    "id": 3,
+    "name": "Valentin Corad",
+    "role": "Analyste Data",
+    "mission": "interne",
+    "joinDate": "2025-07-01",
+    "skills": [
+      "Power BI",
+      "Microsoft Fabric"
+    ],
+    "slack": "",
+    "location": "Lille",
+    "parcours": "Hydrogéologue à l'origine (1 an), puis 2 ans en Slovaquie. Formation Data Scientist. 1 an Data Analyst (prestataire Pôle Emploi). 3 ans Data Analyst CRM pour un groupe japonais. Reconversion data analyse chez Claranet.",
+    "missionDesc": "Projets internes uniquement (Power BI, Fabric).",
+    "passions": "Randonnée, escalade."
+  },
+  {
+    "id": 4,
+    "name": "Nicolas Bacher",
+    "role": "Ingénieur Data",
+    "mission": "both",
+    "joinDate": "2023-11-06",
+    "skills": [
+      "Data Engineering",
+      "DevOps",
+      "IA",
+      "Open Source",
+      "Infra"
+    ],
+    "slack": "",
+    "location": "Rennes",
+    "parcours": "Génie climatique chez Engie, puis reconversion en informatique (3 ans d'alternance). BI dans le BTP, DevOps (plateformes d'infra). Profil couteau-suisse (data eng, analyse, DevOps).",
+    "missionDesc": "Build & run chez des clients, chiffrages. Référent IA et vision data de l'équipe. Plateformes open source.",
+    "passions": "—"
+  },
+  {
+    "id": 5,
+    "name": "Fatima Ezzahra Ramhi",
+    "role": "Ingénieur Data",
+    "mission": "externe",
+    "joinDate": "2025-02-03",
+    "skills": [
+      "Hadoop",
+      "Spark",
+      "Scala",
+      "Python",
+      "Microsoft Fabric"
+    ],
+    "slack": "",
+    "location": "",
+    "parcours": "Master en SI de données à Rouen (origine marocaine). ESN data eng (Hadoop, Spark, Scala, Python), Safran (migration AWS), BPCE Normandie (migration Talend → Microsoft). 1 an chez Claranet, certifiée Fabric.",
+    "missionDesc": "Projets externes : Touax, QEnergie, Trigano.",
+    "passions": "Dessin, DIY."
+  },
+  {
+    "id": 6,
+    "name": "Ivens Joris Dze Boussou",
+    "role": "Ingénieur Data",
+    "mission": "externe",
+    "joinDate": "2025-09-22",
+    "skills": [
+      "Spark",
+      "Scala",
+      "Power BI",
+      "Kafka",
+      "GCP",
+      "Cloudera"
+    ],
+    "slack": "",
+    "location": "Lille",
+    "parcours": "Origine gabonaise (BTS compta). Fac d'éco à Lille 1 (stats, info) + diplôme data science. Stage chez Epsilon (Publicis), BI sur Cognos/Power BI, puis data eng chez Louis Vuitton (Cloudera, Spark Scala, migration GCP, gouvernance données). Chez Claranet (Lille) depuis 8 mois.",
+    "missionDesc": "Data Architect front-end chez Louis Vuitton : refonte de l'app mobile COMEX, suivi KPIs de vente en temps réel (Kafka).",
+    "passions": "Padel, musique, veille techno / PoC, voyages."
+  },
+  {
+    "id": 7,
+    "name": "Kevin Poupon",
+    "role": "Ingénieur Data",
+    "mission": "both",
+    "joinDate": "2023-03-01",
+    "skills": [
+      "Hadoop",
+      "Spark"
+    ],
+    "slack": "",
+    "location": "Rennes",
+    "parcours": "Master en informatique généraliste. Data depuis 7-8 ans dans des sociétés de services (ex. Hello Work). Chez Claranet depuis 3 ans en tant qu'ingénieur data.",
+    "missionDesc": "Ingénieur Data.",
+    "passions": "—"
+  },
+  {
+    "id": 8,
+    "name": "Cedric Vanhoorde",
+    "role": "Ingénieur Data",
+    "mission": "both",
+    "joinDate": "2025-03-01",
+    "skills": [],
+    "slack": "",
+    "location": "Lille",
+    "parcours": "À compléter.",
+    "missionDesc": "À compléter.",
+    "passions": "À compléter."
+  },
+  {
+    "id": 9,
+    "name": "Christophe Covin",
+    "role": "Chef de projets",
+    "mission": "both",
+    "joinDate": "2021-04-19",
+    "skills": [],
+    "slack": "",
+    "location": "Lille",
+    "parcours": "À compléter.",
+    "missionDesc": "À compléter.",
+    "passions": "À compléter."
+  },
+  {
+    "id": 10,
+    "name": "Adrien Lefevre",
+    "role": "Chef de projets",
+    "mission": "both",
+    "joinDate": "2022-06-07",
+    "skills": [],
+    "slack": "",
+    "location": "Lille",
+    "parcours": "À compléter.",
+    "missionDesc": "À compléter.",
+    "passions": "À compléter."
+  },
+  {
+    "id": 11,
+    "name": "Imane Karim",
+    "role": "Analyste Data",
+    "mission": "both",
+    "joinDate": "2023-11-02",
+    "skills": [],
+    "slack": "",
+    "location": "Lille",
+    "parcours": "À compléter.",
+    "missionDesc": "À compléter.",
+    "passions": "À compléter."
+  },
+  {
+    "id": 12,
+    "name": "Nicolas Horn",
+    "role": "Ingénieur Data",
+    "mission": "both",
+    "joinDate": "2025-04-01",
+    "skills": [],
+    "slack": "",
+    "location": "Lille",
+    "parcours": "À compléter.",
+    "missionDesc": "À compléter.",
+    "passions": "À compléter."
+  },
+  {
+    "id": 13,
+    "name": "Antoine Brasdefer",
+    "role": "Chef de projets",
+    "mission": "externe",
+    "joinDate": "2026-06-08",
+    "skills": [
+      "Jira",
+      "Agilité",
+      "Power BI",
+      "Tableau",
+      "Looker"
+    ],
+    "slack": "",
+    "location": "Lille",
+    "parcours": "Double diplôme Ecole d'ingénieur (Centrale Lille et Skema Business School). Stage de Data analyst à Barcelone. Formation Gestion de projet digitale, entrepreneuriat et data science. 3 ans d'xp chez mc2i en tant que coach Agile, Data product manager et chef de projet data migration de MDM.",
+    "missionDesc": "Chef de projet pour le client PRAEMIA (entreprise immobilière)",
+    "passions": "Sports (running, mucu, hockey sur glace et tout ce qui est possible), musique (DJ à ses heure perdures), finances et boire des verres avec ses amis"
+  },
+  {
+    "id": 14,
+    "name": "Ludivine Tulcibiez",
+    "role": "Analyste Data",
+    "mission": "both",
+    "joinDate": "2024-11-12",
+    "skills": [],
+    "slack": "",
+    "location": "Lille",
+    "parcours": "À compléter.",
+    "missionDesc": "À compléter.",
+    "passions": "À compléter."
+  },
+  {
+    "id": 15,
+    "name": "Olivier Patris",
+    "role": "Ingénieur Data",
+    "mission": "both",
+    "joinDate": "2022-06-01",
+    "skills": [],
+    "slack": "",
+    "location": "",
+    "parcours": "À compléter.",
+    "missionDesc": "À compléter.",
+    "passions": "À compléter."
+  },
+  {
+    "id": 16,
+    "name": "Eve Sananes",
+    "role": "Développeur",
+    "mission": "both",
+    "joinDate": "2021-02-08",
+    "skills": [],
+    "slack": "",
+    "location": "Lille",
+    "parcours": "À compléter.",
+    "missionDesc": "À compléter.",
+    "passions": "À compléter."
+  }
+];

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Organigramme - Data Solutions</title>
+<style>
+  :root {
+    --interne: #3b82f6;
+    --externe: #10b981;
+    --both: #8b5cf6;
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+  body { background: var(--bg); color: var(--text); }
+
+  header {
+    background: #0f172a; color: white; padding: 20px 32px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+  }
+  header h1 { font-size: 22px; }
+  .subtitle { color: #94a3b8; font-size: 13px; }
+
+  .toolbar {
+    display: flex; gap: 12px; align-items: center; padding: 16px 32px;
+    background: white; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap;
+  }
+  .search { flex: 1; min-width: 200px; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
+  select { padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: white; }
+
+  .view-toggle { display: flex; background: #e2e8f0; border-radius: 8px; overflow: hidden; }
+  .view-toggle button { border: none; background: transparent; padding: 10px 18px; cursor: pointer; font-size: 14px; font-weight: 500; }
+  .view-toggle button.active { background: #0f172a; color: white; }
+
+  .legend { display: flex; gap: 16px; padding: 12px 32px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+  .legend span { display: flex; align-items: center; gap: 6px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+
+  .container { padding: 24px 32px; }
+
+  /* MANAGER */
+  .manager-zone { display: flex; flex-direction: column; align-items: center; margin-bottom: 8px; }
+  .card.manager { border: 2px solid #0f172a; background: linear-gradient(180deg,#fff,#f8fafc); width: 240px; }
+  .card.manager .avatar { background:#0f172a; color:white; }
+  .manager-tag { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:#0f172a; background:#fde68a; padding:2px 10px; border-radius:20px; display:inline-block; margin-bottom:6px;}
+  .org-line { width: 2px; height: 24px; background: #cbd5e1; }
+  .team-title { text-align:center; font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin:8px 0 18px; }
+
+  /* GRID VIEW */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px; }
+  .card {
+    background: var(--card); border-radius: 14px; padding: 18px; text-align: center;
+    cursor: pointer; transition: .2s; border: 2px solid transparent; box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,.12); border-color: #cbd5e1; }
+  .avatar {
+    width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 12px;
+    background: #e2e8f0; display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 700; color: #64748b; object-fit: cover;
+  }
+  .card h3 { font-size: 16px; margin-bottom: 2px; }
+  .card .role { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+  .card-tags { display:flex; flex-wrap:wrap; gap:5px; justify-content:center; }
+  .tag { background: #e0e7ff; color: #4338ca; padding: 3px 9px; border-radius: 6px; font-size: 11px; font-weight: 500; }
+
+/* VENN VIEW */
+  #vennView { display: none; }
+  .venn-wrap { display: flex; justify-content: center; padding: 10px; }
+  svg { width: 100%; height: auto; }
+  .venn-rect { fill-opacity: .18; stroke-width: 2.5; cursor: pointer; transition: .2s; }
+  .venn-rect:hover { fill-opacity: .3; }
+  .venn-label { font-size: 18px; font-weight: 800; pointer-events: none; }
+  .venn-person { cursor: pointer; }
+  .venn-person:hover .vp-name { fill: #ef4444; }
+  .vp-name { font-size: 11px; font-weight: 600; fill: #0f172a; text-anchor: middle; }
+
+  /* PANEL */
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.5); z-index: 50; }
+  .panel {
+    position: fixed; top: 0; right: 0; width: 420px; max-width: 90vw; height: 100%;
+    background: white; z-index: 60; padding: 32px; overflow-y: auto;
+    transform: translateX(100%); transition: transform .3s; box-shadow: -4px 0 24px rgba(0,0,0,.2);
+  }
+  .panel.open { transform: translateX(0); }
+  .panel .close { position: absolute; top: 20px; right: 24px; border: none; background: #e2e8f0; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer; }
+  .panel .avatar { width: 110px; height: 110px; font-size: 38px; }
+  .panel h2 { text-align: center; margin-bottom: 4px; }
+  .panel .role { text-align: center; color: var(--muted); margin-bottom: 16px; }
+  .panel-section { margin-top: 20px; }
+  .panel-section h4 { font-size: 13px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; letter-spacing: .5px; }
+  .panel-section p { font-size: 14px; line-height: 1.5; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .slack-btn { display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; background: #4A154B; color: white; text-decoration: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; color: white; }
+  .badge.interne { background: var(--interne); }
+  .badge.externe { background: var(--externe); }
+  .badge.both { background: var(--both); }
+  .meta-row { display: flex; justify-content: space-between; font-size: 14px; padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
+
+  .top-zone { display:flex; justify-content:center; align-items:flex-start; gap:40px; flex-wrap:wrap; }
+  .partner-zone { position:relative; }
+  .partner-zone::before {
+    content:"↔ Collabore avec l'équipe"; position:absolute; top:-22px; left:50%; transform:translateX(-50%);
+    font-size:11px; color:var(--muted); white-space:nowrap;
+  }
+  .card.partner { border:2px dashed #94a3b8; background:#f8fafc; width:240px; }
+  .partner-tag { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px;
+    color:#475569; background:#e2e8f0; padding:2px 10px; border-radius:20px; display:inline-block; margin-bottom:6px; }
+  .card .location { font-size:12px; color:var(--muted); margin:-4px 0 8px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>👥 Organigramme — Data Solutions</h1>
+    <div class="subtitle">Trombinoscope interactif de l'équipe</div>
+  </div>
+  <div class="view-toggle">
+    <button id="btnGrid" class="active" onclick="switchView('grid')">Trombinoscope</button>
+    <button id="btnVenn" onclick="switchView('venn')">Diagramme de Venn</button>
+  </div>
+</header>
+
+<div class="toolbar">
+  <input type="text" id="search" class="search" placeholder="🔍 Rechercher (nom, rôle, compétence...)" oninput="render()">
+  <select id="filterSkill" onchange="render()">
+    <option value="">Toutes les compétences</option>
+  </select>
+  <select id="filterMission" onchange="render()">
+    <option value="">Toutes les missions</option>
+    <option value="interne">Interne</option>
+    <option value="externe">Externe</option>
+    <option value="both">Les deux</option>
+  </select>
+</div>
+
+<div class="legend">
+  <span><i class="dot" style="background:var(--interne)"></i> Projets internes</span>
+  <span><i class="dot" style="background:var(--externe)"></i> Projets externes</span>
+  <span><i class="dot" style="background:var(--both)"></i> Les deux</span>
+</div>
+
+<div class="container">
+<div id="gridView">
+    <div class="top-zone">
+      <div class="manager-zone" id="managerZone"></div>
+      <div class="partner-zone" id="partnerZone"></div>
+    </div>
+    <div class="org-line" style="margin:0 auto;"></div>
+    <div class="team-title">— L'équipe Data Solutions —</div>
+    <div class="grid" id="teamGrid"></div>
+  </div>
+
+  <div id="vennView">
+    <p style="text-align:center; color:var(--muted); margin-bottom:8px;">Cliquez sur une zone pour filtrer, ou sur une personne pour voir le détail.</p>
+    <div class="venn-wrap">
+      <svg viewBox="0 0 1000 520" id="vennSvg"></svg>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closePanel()"></div>
+<div class="panel" id="panel"></div>
+
+<script>
+/* ============================================================
+   👉 ZONE DE DONNÉES — À REMPLACER PAR TES VRAIES DONNÉES
+   isManager : true pour le responsable d'équipe
+   mission : "interne" | "externe" | "both"
+   joinDate : format AAAA-MM-JJ (sert à calculer l'ancienneté)
+   ============================================================ */
+
+let DATA = [];
+
+// Charge les données depuis data.json (même dossier)
+async function loadData(){
+  try{
+    const res = await fetch('data.json?v=' + Date.now()); // ?v= évite le cache
+    DATA = await res.json();
+    initApp();
+  }catch(e){
+    document.body.innerHTML = '<p style="padding:40px;color:red">Erreur de chargement des données (data.json introuvable).</p>';
+  }
+}
+
+function initApp(){
+  /* ============================================================
+    LOGIQUE
+    ============================================================ */
+  const initials = n => n.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+  const missionLabel = { interne:"Interne", externe:"Externe", both:"Les deux" };
+  const MANAGER = DATA.find(p=>p.isManager);
+  const PARTNERS = DATA.filter(p=>p.isPartner);
+  const TEAM = DATA.filter(p=>!p.isManager && !p.isPartner);
+
+  function anciennete(dateStr){
+    const d = new Date(dateStr), now = new Date();
+    let months = (now.getFullYear()-d.getFullYear())*12 + (now.getMonth()-d.getMonth());
+    const y = Math.floor(months/12), m = months%12;
+    if(y===0) return m+" mois";
+    return y+" an"+(y>1?"s":"")+(m>0?" et "+m+" mois":"");
+  }
+
+  const allSkills = [...new Set(DATA.flatMap(p=>p.skills))].sort();
+  const skillSel = document.getElementById('filterSkill');
+  allSkills.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; skillSel.appendChild(o); });
+
+  let currentView = 'grid';
+
+  function avatarHtml(p, cls=''){
+    return `<div class="avatar ${cls}">${p.photo?`<img src="${p.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`:initials(p.name)}</div>`;
+  }
+
+  function cardHtml(p, type=''){
+    const tag = type==='manager' ? `<span class="manager-tag">⭐ Manager</span>`
+              : type==='partner' ? `<span class="partner-tag">🤝 Autre équipe</span>` : '';
+    return `
+      <div class="card ${type}" onclick="openPanel(${p.id})">
+        ${tag}
+        ${avatarHtml(p)}
+        <h3>${p.name}</h3>
+        <div class="role">${p.role}</div>
+        ${p.location ? `<div class="location">📍 ${p.location}</div>` : ''}
+        <div class="card-tags">${p.skills.length ? p.skills.map(s=>`<span class="tag">${s}</span>`).join('') : '<span class="tag" style="opacity:.5">À compléter</span>'}</div>
+      </div>`;
+  }
+
+  function getFiltered(){
+    const q = document.getElementById('search').value.toLowerCase();
+    const skill = document.getElementById('filterSkill').value;
+    const mission = document.getElementById('filterMission').value;
+    return TEAM.filter(p=>{
+      const matchQ = !q || (p.name+p.role+p.skills.join(" ")).toLowerCase().includes(q);
+      const matchSkill = !skill || p.skills.includes(skill);
+      const matchMission = !mission || p.mission===mission;
+      return matchQ && matchSkill && matchMission;
+    });
+  }
+
+  function render(){
+    document.getElementById('managerZone').innerHTML = cardHtml(MANAGER, 'manager');
+    document.getElementById('partnerZone').innerHTML = PARTNERS.map(p=>cardHtml(p,'partner')).join('');
+    const list = getFiltered();
+    document.getElementById('teamGrid').innerHTML =
+      list.map(p=>cardHtml(p)).join('') || `<p style="color:var(--muted)">Aucun résultat.</p>`;
+  }
+
+
+  /* ---- VENN (rectangles arrondis, disposition dynamique, zone centrale = 3 colonnes) ---- */
+  function drawVenn(){
+    const svg = document.getElementById('vennSvg');
+
+    // On inclut manager + partenaires + équipe dans le Venn
+    const ALL = DATA.slice();
+    const groups = {
+      interne: ALL.filter(p=>p.mission==='interne'),
+      both:    ALL.filter(p=>p.mission==='both'),
+      externe: ALL.filter(p=>p.mission==='externe'),
+    };
+
+    // --- Paramètres ajustables ---
+    const R = 30;            // rayon photo
+    const cellW = 130;       // largeur d'une case personne
+    const cellH = 95;        // hauteur d'une case (photo + nom)
+    const PAD_TOP = 90;      // espace pour les labels
+    const colsInterne = 2;   // zone gauche
+    const colsBoth    = 3;   // zone centrale (intersection) → 3 colonnes
+    const colsExterne = 2;   // zone droite
+    const startX = 40;
+
+    // Nombre de lignes nécessaires par zone
+    const rows = {
+      interne: Math.ceil(groups.interne.length / colsInterne) || 1,
+      both:    Math.ceil(groups.both.length    / colsBoth)    || 1,
+      externe: Math.ceil(groups.externe.length / colsExterne) || 1,
+    };
+    const maxRows = Math.max(rows.interne, rows.both, rows.externe, 1);
+
+    // Hauteur dynamique
+    const rectH = maxRows * cellH + 60;
+    const rectY = PAD_TOP;
+
+    // Largeurs en pixels
+    const wInterne = colsInterne * cellW;
+    const wBoth    = colsBoth    * cellW;
+    const wExterne = colsExterne * cellW;
+
+    // Rectangles qui se chevauchent sur la zone "both"
+    const rectInterne = { x: startX, w: wInterne + wBoth };
+    const rectExterne = { x: startX + wInterne, w: wBoth + wExterne };
+
+    const totalW = startX*2 + wInterne + wBoth + wExterne;
+    const totalH = rectY + rectH + 70;
+
+    // Centres X de départ de chaque zone-colonne
+    const xInterneStart = startX + cellW/2;
+    const xBothStart    = startX + wInterne + cellW/2;
+    const xExterneStart = startX + wInterne + wBoth + cellW/2;
+
+    svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+
+    let html = `
+      <rect class="venn-rect" x="${rectInterne.x}" y="${rectY}" width="${rectInterne.w}" height="${rectH}" rx="40"
+            fill="var(--interne)" stroke="var(--interne)" onclick="setVennFilter('interne')"/>
+      <rect class="venn-rect" x="${rectExterne.x}" y="${rectY}" width="${rectExterne.w}" height="${rectH}" rx="40"
+            fill="var(--externe)" stroke="var(--externe)" onclick="setVennFilter('externe')"/>
+      <text class="venn-label" x="${rectInterne.x + 20}" y="${rectY - 30}" fill="var(--interne)">INTERNE</text>
+      <text class="venn-label" x="${rectExterne.x + rectExterne.w - 130}" y="${rectY - 30}" fill="var(--externe)">EXTERNE</text>
+      <text x="${startX + wInterne + wBoth/2}" y="${totalH - 25}" text-anchor="middle" font-size="14" font-weight="700" fill="var(--both)"
+            style="cursor:pointer" onclick="setVennFilter('both')">↕ Les deux (intersection)</text>
+    `;
+
+    function renderPerson(p, cx, cy){
+      const img = p.photo
+        ? `<image href="${p.photo}" x="${cx-R}" y="${cy-R}" width="${R*2}" height="${R*2}" clip-path="url(#clip${p.id})"/>`
+        : `<text x="${cx}" y="${cy+6}" text-anchor="middle" font-size="16" font-weight="700" fill="#475569">${initials(p.name)}</text>`;
+      const name = p.name.length > 18 ? p.name.slice(0,17)+'…' : p.name;
+      return `
+        <clipPath id="clip${p.id}"><circle cx="${cx}" cy="${cy}" r="${R}"/></clipPath>
+        <g class="venn-person" onclick="openPanel(${p.id})">
+          <circle cx="${cx}" cy="${cy}" r="${R}" fill="#e2e8f0" stroke="white" stroke-width="3"/>
+          ${img}
+          <text class="vp-name" x="${cx}" y="${cy+R+15}">${name}</text>
+        </g>`;
+    }
+
+    function placeGroup(list, cols, xStart){
+      const n = list.length;
+      const nbRows = Math.ceil(n / cols) || 1;
+      const gridH = nbRows * cellH;
+      const yStart = rectY + (rectH - gridH)/2 + cellH/2; // centrage vertical
+      let s = '';
+      list.forEach((p, i)=>{
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        const itemsThisRow = Math.min(cols, n - row*cols);
+        const rowOffset = (cols - itemsThisRow) * cellW / 2; // centrer la dernière ligne incomplète
+        const cx = xStart + col * cellW + rowOffset;
+        const cy = yStart + row * cellH;
+        s += renderPerson(p, cx, cy);
+      });
+      return s;
+    }
+
+    html += placeGroup(groups.interne, colsInterne, xInterneStart);
+    html += placeGroup(groups.both,    colsBoth,    xBothStart);
+    html += placeGroup(groups.externe, colsExterne, xExterneStart);
+
+    svg.innerHTML = html;
+  }
+
+  function setVennFilter(m){
+    document.getElementById('filterMission').value = m;
+    switchView('grid');
+    render();
+  }
+
+  function switchView(v){
+    currentView=v;
+    document.getElementById('gridView').style.display = v==='grid'?'block':'none';
+    document.getElementById('vennView').style.display = v==='venn'?'block':'none';
+    document.getElementById('btnGrid').classList.toggle('active', v==='grid');
+    document.getElementById('btnVenn').classList.toggle('active', v==='venn');
+    if(v==='venn') drawVenn();
+  }
+
+  /* ---- PANEL ---- */
+  function openPanel(id){
+    const p = DATA.find(x=>x.id===id);
+    const panel = document.getElementById('panel');
+    panel.innerHTML = `
+      <button class="close" onclick="closePanel()">×</button>
+      ${avatarHtml(p)}
+      <h2>${p.name}</h2>
+      <div class="role">${p.role} &nbsp;·&nbsp; <span class="badge ${p.mission}">${missionLabel[p.mission]}</span></div>
+
+  <div class="panel-section">
+        <div class="meta-row"><span>📍 Localisation</span><strong>${p.location || "Non renseignée"}</strong></div>
+        <div class="meta-row"><span>📅 Ancienneté</span><strong>${anciennete(p.joinDate)}</strong></div>
+        <div class="meta-row"><span>Arrivé(e) le</span><span>${p.joinDate ? new Date(p.joinDate).toLocaleDateString('fr-FR') : "—"}</span></div>
+      </div>
+
+      <div class="panel-section"><h4>🎯 Mission actuelle</h4><p>${p.missionDesc}</p></div>
+      <div class="panel-section"><h4>🎓 Parcours</h4><p>${p.parcours}</p></div>
+      <div class="panel-section"><h4>❤️ Passions</h4><p>${p.passions}</p></div>
+      <div class="panel-section"><h4>🛠️ Compétences</h4>
+        <div class="tags">${p.skills.map(s=>`<span class="tag">${s}</span>`).join('')}</div>
+      </div>
+      <div class="panel-section">
+        <a class="slack-btn" href="https://slack.com/app_redirect?channel=${p.slack}" target="_blank">💬 Contacter sur Slack (${p.slack})</a>
+      </div>
+    `;
+    panel.classList.add('open');
+    document.getElementById('overlay').style.display='block';
+  }
+  function closePanel(){
+    document.getElementById('panel').classList.remove('open');
+    document.getElementById('overlay').style.display='none';
+  }
+}
+loadData(); // démarre tout
+</script>
+</body>
+</html>
