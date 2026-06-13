@@ -39,4 +39,4 @@ Trombinoscope interactif de l'équipe Data Solutions.
 
 ## 👤 Contact
 
-Pour toute modification → contacter **Pierre Robin** (Team Lead Data Solutions)
+Pour toute modification → contacter **Antoine Brasdefer**
