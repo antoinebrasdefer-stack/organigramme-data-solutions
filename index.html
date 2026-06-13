@@ -174,55 +174,6 @@
    ============================================================ */
 
 let DATA = [];
-
-// Charge les données depuis data.json (même dossier)
-async function loadData(){
-  try{
-    // Essaie d'abord le chemin relatif
-    const url = 'data.json?v=' + Date.now();
-    console.log('Tentative de chargement :', url);
-    
-    const res = await fetch(url);
-    
-    // Affiche le statut HTTP
-    console.log('Statut HTTP :', res.status, res.statusText);
-    
-    if(!res.ok){
-      throw new Error(`HTTP ${res.status} - ${res.statusText}`);
-    }
-    
-    const text = await res.text();
-    console.log('Contenu reçu (100 premiers caractères) :', text.slice(0,100));
-    
-    DATA = JSON.parse(text);
-    console.log('Nombre de personnes chargées :', DATA.length);
-    
-    initApp();
-    
-  }catch(e){
-    // Affiche l'erreur EXACTE dans la page
-    document.body.innerHTML = `
-      <div style="padding:40px;font-family:sans-serif">
-        <h2 style="color:red">❌ Erreur de chargement</h2>
-        <p><strong>Message :</strong> ${e.message}</p>
-        <p><strong>URL du site :</strong> ${window.location.href}</p>
-        <p><strong>URL tentée :</strong> ${window.location.origin + window.location.pathname.replace('index.html','')}data.json</p>
-        <hr>
-        <h3>Solutions :</h3>
-        <ol>
-          <li>Vérifie que <code>data.json</code> est bien à la racine du dépôt GitHub</li>
-          <li>Vérifie que GitHub Pages est activé sur <strong>main / root</strong></li>
-          <li>Attends 2-3 minutes et rafraîchis (<code>Ctrl+F5</code>)</li>
-        </ol>
-      </div>`;
-  }
-}
-
-<script>
-/* ============================================================
-   VARIABLES GLOBALES (accessibles partout)
-   ============================================================ */
-let DATA = [];
 let MANAGER, PARTNERS, TEAM;
 let currentView = 'grid';
 
