@@ -1,4 +1,4 @@
-const DATA = [
+[
   {
     "id": 0,
     "name": "Pierre Robin",
@@ -301,4 +301,4 @@ const DATA = [
     "missionDesc": "À compléter.",
     "passions": "À compléter."
   }
-];
+]
