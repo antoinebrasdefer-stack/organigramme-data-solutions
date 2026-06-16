@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><title>Convertir Excel → JSON</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+body{font-family:'Segoe UI',sans-serif;max-width:800px;margin:40px auto;padding:0 20px;color:#1e293b}
+h1{font-size:22px}.box{background:#f1f5f9;border-radius:12px;padding:24px;margin:16px 0}
+input[type=file]{margin:12px 0}
+button{background:#0f172a;color:#fff;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;font-size:14px}
+button:disabled{opacity:.4;cursor:not-allowed}
+textarea{width:100%;height:300px;margin-top:16px;font-family:monospace;font-size:12px;border:1px solid #cbd5e1;border-radius:8px;padding:12px}
+.ok{color:#10b981;font-weight:600}.err{color:#ef4444;font-weight:600}
+.step{margin:8px 0}
+</style></head><body>
+<h1>🔄 Convertisseur Excel → données du site</h1>
+<div class="box">
+  <div class="step">1️⃣ Sélectionne ton fichier <b>equipe.xlsx</b> :</div>
+  <input type="file" id="file" accept=".xlsx,.xls">
+  <div class="step">2️⃣ Clique pour convertir, puis copie le résultat.</div>
+  <button id="btn" disabled onclick="convert()">Convertir</button>
+  <button onclick="copier()">📋 Copier le résultat</button>
+  <div id="status"></div>
+</div>
+<textarea id="out" placeholder="Le code généré apparaîtra ici..."></textarea>
+
+<script>
+let workbook=null;
+document.getElementById('file').addEventListener('change',e=>{
+  const f=e.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{ workbook=XLSX.read(new Uint8Array(ev.target.result),{type:'array'}); document.getElementById('btn').disabled=false; status('✅ Fichier chargé : '+f.name,'ok'); };
+  r.readAsArrayBuffer(f);
+});
+
+function status(msg,cls){ document.getElementById('status').innerHTML='<p class="'+cls+'">'+msg+'</p>'; }
+
+function convert(){
+  try{
+    const sheet = workbook.Sheets['Equipe'] || workbook.Sheets[workbook.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet, {defval:""});
+    let idTeam=1, idPartner=100;
+    const data = rows.map(r=>{
+      // ID : manager=0, partner=100+, équipe=1+
+      let id;
+      const type = (r.type||'team').toLowerCase().trim();
+      if(type==='manager') id=0;
+      else if(type==='partner') id=idPartner++;
+      else id=idTeam++;
+
+      const obj = {
+        id,
+        name:String(r.name||'').trim(),
+        role:String(r.role||'').trim(),
+        mission:(r.mission||'both').toLowerCase().trim(),
+        joinDate:formatDate(r.joinDate),
+        skills:String(r.skills||'').split(/[;,]/).map(s=>s.trim()).filter(Boolean),
+        slack:String(r.slack||'').trim(),
+        location:String(r.location||'').trim(),
+        parcours:String(r.parcours||'À compléter.').trim(),
+        missionDesc:String(r.missionDesc||'À compléter.').trim(),
+        passions:String(r.passions||'À compléter.').trim()
+      };
+      if(r.photo) obj.photo=String(r.photo).trim();
+      if(type==='manager') obj.isManager=true;
+      if(type==='partner') obj.isPartner=true;
+      return obj;
+    }).filter(o=>o.name);
+
+    const js = JSON.stringify(data,null,2);
+    document.getElementById('out').value = js;
+    status('✅ '+data.length+' personnes converties ! Copie le code et colle-le dans organigramme.html (remplace le bloc const DATA = [...]).','ok');
+  }catch(e){ status('❌ Erreur : '+e.message,'err'); }
+}
+
+// Gère les dates Excel (numériques) ET texte "2024-03-01"
+function formatDate(v){
+  if(!v) return "";
+  if(typeof v==='number'){ // date Excel = nb de jours depuis 1900
+    const d=new Date(Date.UTC(1899,11,30)+v*86400000);
+    return d.toISOString().slice(0,10);
+  }
+  const s=String(v).trim();
+  // si déjà au format AAAA-MM-JJ
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+  // si format JJ/MM/AAAA
+  const m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  return s;
+}
+
+function copier(){
+  const t=document.getElementById('out'); t.select(); document.execCommand('copy');
+  status('📋 Copié ! Colle-le maintenant dans organigramme.html','ok');
+}
+</script>
+</body></html>
