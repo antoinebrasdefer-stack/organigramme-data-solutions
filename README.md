@@ -5,6 +5,7 @@ Trombinoscope interactif de l'équipe Data Solutions.
 ## 🌐 Accéder au site
 
 👉 **[Ouvrir l'organigramme](https://antoinebrasdefer-stack.github.io/organigramme-data-solutions/)**
+👉 **[Ouvrir le fichier de données]([https://antoinebrasdefer-stack.github.io/organigramme-data-solutions/](https://claranet.sharepoint.com/:x:/s/fr-practice-data-ai/IQB1ugRu9NWzQqPKaZQIrttmAe2HT-Bchd3D0rfiMAwNSGY?e=d8pBdM))**
 
 ---
 
