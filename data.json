@@ -1,4 +1,4 @@
-[
+const DATA = [
   {
     "id": 0,
     "name": "Pierre Robin",
@@ -31,7 +31,7 @@
     "location": "Rennes",
     "parcours": "Stage de fin d'études chez Claranet puis alternance. Études de contrôle de gestion et de bases de données, IAE Rennes. Profil hybride BI + Data Engineering.",
     "missionDesc": "PO sur des projets data internes. Mission de regroupement des dashboards existants en plus du run de ses projets. (Autre équipe).",
-    "passions": "Preneur de bonnes pratiques sur le product ownership.",
+    "passions": "À compléter.",
     "isPartner": true
   },
   {
@@ -68,7 +68,7 @@
     "location": "Rennes",
     "parcours": "Alternance BTS puis Master. AMOA banque (Natixis, BNP) sur la fraude. Sopra Steria en alternance (service public). ESN spécialisée data. Data Engineer chez Accor Hotels. Chez Claranet depuis mars.",
     "missionDesc": "Open stack : dbt, Snowflake, Airflow, DevOps (GitHub).",
-    "passions": "Musculation, course à pied. Marié."
+    "passions": "Musculation, course à pied."
   },
   {
     "id": 3,
@@ -166,20 +166,26 @@
     "role": "Ingénieur Data",
     "mission": "both",
     "joinDate": "2025-03-01",
-    "skills": [],
+    "skills": [
+      "Infra"
+    ],
     "slack": "",
     "location": "Lille",
-    "parcours": "À compléter.",
-    "missionDesc": "À compléter.",
-    "passions": "À compléter."
+    "parcours": "Travaille chez Claranet depuis longtemps. A commencé à travailler sur des outils internes et a décidé de se lancer en tant que data ingénieur.",
+    "missionDesc": "Ingénieur Data sur plusieurs missions externes",
+    "passions": "Moto"
   },
   {
     "id": 9,
     "name": "Christophe Covin",
     "role": "Chef de projets",
-    "mission": "both",
+    "mission": "externe",
     "joinDate": "2021-04-19",
-    "skills": [],
+    "skills": [
+      "Jira",
+      "Agilité",
+      "Infra"
+    ],
     "slack": "",
     "location": "Lille",
     "parcours": "À compléter.",
@@ -190,9 +196,12 @@
     "id": 10,
     "name": "Adrien Lefevre",
     "role": "Chef de projets",
-    "mission": "both",
+    "mission": "externe",
     "joinDate": "2022-06-07",
-    "skills": [],
+    "skills": [
+      "Jira",
+      "Agilité"
+    ],
     "slack": "",
     "location": "Lille",
     "parcours": "À compléter.",
@@ -216,7 +225,7 @@
     "id": 12,
     "name": "Nicolas Horn",
     "role": "Ingénieur Data",
-    "mission": "both",
+    "mission": "interne",
     "joinDate": "2025-04-01",
     "skills": [],
     "slack": "",
@@ -242,7 +251,8 @@
     "location": "Lille",
     "parcours": "Double diplôme Ecole d'ingénieur (Centrale Lille et Skema Business School). Stage de Data analyst à Barcelone. Formation Gestion de projet digitale, entrepreneuriat et data science. 3 ans d'xp chez mc2i en tant que coach Agile, Data product manager et chef de projet data migration de MDM.",
     "missionDesc": "Chef de projet pour le client PRAEMIA (entreprise immobilière)",
-    "passions": "Sports (running, mucu, hockey sur glace et tout ce qui est possible), musique (DJ à ses heure perdures), finances et boire des verres avec ses amis"
+    "passions": "Sports (running, mucu, hockey sur glace et tout ce qui est possible), musique (DJ à ses heure perdures), finances et boire des verres avec ses amis",
+    "photo": "photos/antoine-brasdefer.jpg"
   },
   {
     "id": 14,
@@ -250,24 +260,32 @@
     "role": "Analyste Data",
     "mission": "both",
     "joinDate": "2024-11-12",
-    "skills": [],
+    "skills": [
+      "Power BI",
+      "Microsoft Fabric"
+    ],
     "slack": "",
     "location": "Lille",
-    "parcours": "À compléter.",
-    "missionDesc": "À compléter.",
-    "passions": "À compléter."
+    "parcours": "10 ans d'expérience dans le retail où elle a pu faire de la vente pour Nestlé. A repris ses études dans la data et a rejoint Claranet en tant qu'Alternante.",
+    "missionDesc": "Quelques missions pour des clients externes et internes. Va travailler sur le projet PRAEMIA",
+    "passions": "Running, animaux (notamment son chien)"
   },
   {
     "id": 15,
     "name": "Olivier Patris",
     "role": "Ingénieur Data",
-    "mission": "both",
+    "mission": "externe",
     "joinDate": "2022-06-01",
-    "skills": [],
+    "skills": [
+      "SQL",
+      "Agilité",
+      "Infrastructure",
+      "Cloudera"
+    ],
     "slack": "",
     "location": "",
-    "parcours": "À compléter.",
-    "missionDesc": "À compléter.",
+    "parcours": "25 ans de travail toujours dans la Data. A travaillé en ESN puis chez Malakoff humain. Ingénieur étude et dvp. Pas mal de BI et d’extractions de données sur la partie Marketing. ETO (Publicis -> Epsilon) de 2015 à 2021. Boîte hybride en marketing et publicité. Set up plateforme chez des clients sur SQL server. Était le référent technique. Appliquait la méthode Agile. Petite expérience chez Leroy Merlin en tant que manager mais n’est pas resté longtemps. \r\nAime la technique. Recruté par Amand en tant que DE en 2022.",
+    "missionDesc": "Keolis, Allopneu, Cebia et Trigano en ce moment",
     "passions": "À compléter."
   },
   {
@@ -283,4 +301,4 @@
     "missionDesc": "À compléter.",
     "passions": "À compléter."
   }
-]
+];
